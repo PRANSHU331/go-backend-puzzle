@@ -1,0 +1,13 @@
+git checkout starter-base
+git clean -fd  # Remove untracked files
+./run_tests.sh perf-001  # Must get 100% pass
+
+git add internal/handlers/customers.go internal/services/customer_service.go \
+         internal/repository/order_repo.go internal/handlers/metrics.go
+git diff --cached -- . ':!tasks/' > tasks/perf-001/task_diff.txt
+git reset HEAD internal/  # Unstage files
+
+head -20 tasks/perf-001/task_diff.txt
+
+git add tasks/perf-001/task_diff.txt
+git commit -m "Add real implementation diff for perf-001"

@@ -1,8 +1,19 @@
 version: "3.9"
 services:
-  test:
-    image: golang:1.20
-    working_dir: /app
+  tester:
+    image: python:3.11-slim
+    working_dir: /tests
     volumes:
-      - ../..:/app
-    command: ["./task/perf-001/run-tests.sh", "perf-001"]
+      - .:/tests
+    command: bash -c "
+      pip install pytest==8.3.3 requests==2.32.3 && 
+      pytest task_tests.py -v --tb=short
+    "
+    depends_on:
+      -app
+  app:
+    build: ../../ 
+    image: puzzle/your-repo:latest
+    ports:
+      - "8080:8080"
+    command: ["./run_task_tests.sh", "perf-001"]
