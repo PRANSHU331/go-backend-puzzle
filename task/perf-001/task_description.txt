@@ -1,0 +1,36 @@
+task_description: |
+	Task: perf-001 - Reduce order-list latency by eliminating N+1 database calls
+
+	Instructions:
+	Background:
+	Your Golang backend exposes an endpoint that returns a list of customers with their recent orders and an aggregated total per customer. The current implementation in the base repo suffers from an N+1 query pattern: for N customers the service issues 1 query to fetch customers + N queries to fetch orders per customer. This causes poor latency and high DB load for larger customer sets.
+
+	Goal:
+	Refactor and optimize the backend so that the service retrieves the same correct data but with **O(1)** (constant w.r.t N) or **O(2)** queries overall (i.e., fetch customers in one query and fetch all relevant orders in a single batched query), thereby eliminating the N+1 pattern.
+
+	Success criteria (all must be met):
+	1. The external API response shape and correctness must be unchanged: for each returned customer include id, name, orders (list), and total_amount (sum of order amounts).
+	2. The optimized implementation must reduce the number of repository "fetchOrdersForCustomer" calls: tests will assert that the number of per-customer order fetch calls is <= 2 for any customer set.
+	3. Must be thread-safe for concurrent requests.
+	4. Must not change authentication or public handler behavior.
+	5. Updates should be done across **3+ files** (e.g., handler, service/business logic, repository/data access, and optionally cache/util).
+	6. Implementation must include appropriate unit tests and pass the provided test-suite.
+
+	Technical requirements and notes:
+	- Use dependency inversion for data access: the repo layer must expose interfaces that can be mocked in tests.
+	- Add or modify code to support batched order fetching (e.g., `FetchOrdersForCustomers(customerIDs []int) (map[int][]Order, error)`).
+	- Avoid using global mutable state (unless properly synchronized).
+	- Keep public API contract (JSON fields and HTTP status codes) unchanged.
+	- Do not add any UI changes.
+
+	Deliverables:
+	- Implement the optimized solution in the main repo modifying 3+ files.
+	- Ensure tests (below) pass.
+	- Produce `task_diff.txt` containing the git diff of your implementation (excluding the tasks folder).
+
+difficulty: hard
+category: Perf
+tags: [golang, performance, db, backend]
+parser_name: go-test
+author_name: Pranshu Kumar Choudhary
+author_email: pranshukumarkatni@gmail.com
